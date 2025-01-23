@@ -1,0 +1,38 @@
+{
+    "Extract": {
+        "en": "Extract",
+        "fr": "Extraire"
+    },
+    "Settings": {
+        "en": "Settings",
+        "fr": "Paramètres"
+    },
+    "Size": {
+        "en": "Size",
+        "fr": "Taille"
+    },
+    "SaveAs": {
+        "en": "Save As...",
+        "fr": "Enregistrer sous..."
+    },
+    "Browse": {
+        "en": "Browse...",
+        "fr": "Parcourir..."
+    },
+    "Cancel": {
+        "en": "Cancel",
+        "fr": "Annuler"
+    },
+    "FileSelected": {
+        "en": "File selected: ",
+        "fr": "Fichier sélectionné : "
+    },
+    "None": {
+        "en": "None",
+        "fr": "Aucun"
+    },
+    "Ready": {
+        "en": "Ready",
+        "fr": "Prêt"
+    }
+}
