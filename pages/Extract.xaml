@@ -50,7 +50,7 @@
         
         <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Bottom" Orientation="Vertical">
             <Button Name="BrowseButton" Style="{DynamicResource ButtonStyle}" Content="{DynamicResource Browse}"/>
-            <Button Name="SaveAsButton" Style="{DynamicResource ButtonStyle}" Content="{DynamicResource SaveAs}"/>
+            <Button Name="SaveAsButton" Style="{DynamicResource ButtonStyle}" Content="{DynamicResource SaveAs}" IsEnabled="False"/>
         </StackPanel>
     </Grid>
 </Page>
