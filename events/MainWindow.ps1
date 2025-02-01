@@ -29,10 +29,16 @@ $MainWindow.Add_Drop({
         [System.Windows.MessageBox]::Show('Only one file can be dropped.', 'Error', 'OK', 'Error')
         return
     }
+    if (!$_.Data.GetFileDropList()[0].EndsWith('.exe')) {
+        [System.Windows.MessageBox]::Show('Only .exe files can be dropped.', 'Error', 'OK', 'Error')
+        return
+    }
 
-    # Get the dropped file.
-    $file = $_.Data.GetFileDropList()[0]
-
-    # Check if the file is an executable.
-    $Extract_IconPreviewImage.Source = $file.FullName
+    $Extract_IconPreviewImage.Tag = $_.Data.GetFileDropList()[0]
+    $paramSetIconPreview = @{
+        Control  = $Extract_IconPreviewImage
+        FilePath = $Extract_IconPreviewImage.Tag
+        Size     = $Extract_IconPreviewImage.Width
+    }
+    Set-IconPreview @paramSetIconPreview
 })

@@ -328,45 +328,70 @@ function Export-Icon {
     end {}
 }
 
-function Set-StatusBar {
+function Set-IconPreview {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $false)]
-        $StatusBarControl,
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [System.Windows.Controls.Image]$Control,
 
         [Parameter(Mandatory = $true)]
-        $Definition
+        [ValidateScript({ Test-Path -Path $_ -PathType 'Leaf' })]
+        [string]$FilePath,
+
+        [Parameter(Mandatory = $false)]
+        [ValidateRange(16, 512)]
+        [int]$Size = 256
     )
     
     begin {
         
     }
-    
+
     process {
-        
+        # Extract the icon and set it as the source for the Image control
+        $icon = [System.Drawing.Icon]::ExtractIcon($FilePath, 0, $Size).ToBitmap()
+        $iconStream = [System.IO.MemoryStream]::new()
+        $icon.Save($iconStream, [System.Drawing.Imaging.ImageFormat]::Png)
+        $iconStream.Position = 0
+        $iconBitmap = [System.Windows.Media.Imaging.BitmapImage]::new()
+        $iconBitmap.BeginInit()
+        $iconBitmap.StreamSource = $iconStream
+        $iconBitmap.EndInit()
+        $Control.Source = $iconBitmap
     }
-    
-    end {
-        
-    }
+
+    end {}
 }
 
-function Clear-StatusBar {
+function Save-Image {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $false)]
-        $StatusBarControl
+        [Parameter(Mandatory = $true)]
+        [System.Windows.Media.Imaging.BitmapSource]$ImageSource,
+
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath
     )
     
     begin {
-        
+        $fileStream = [System.IO.File]::Create($dialog.FileName)
     }
     
     process {
-        
+        $fileType = [System.IO.Path]::GetExtension($FilePath).TrimStart('.').ToLower()
+
+        $bitmapEncoder = switch ($fileType) {
+            'png' { [System.Windows.Media.Imaging.PngBitmapEncoder]::new() }
+            'jpg' { [System.Windows.Media.Imaging.JpegBitmapEncoder]::new() }
+            'gif' { [System.Windows.Media.Imaging.GifBitmapEncoder]::new() }
+            'bmp' { [System.Windows.Media.Imaging.BmpBitmapEncoder]::new() }
+            default { throw 'Unsupported file type.' }
+        }
+        $bitmapEncoder.Frames.Add([System.Windows.Media.Imaging.BitmapFrame]::Create($ImageSource))
+        $bitmapEncoder.Save($fileStream)
     }
     
     end {
-        
+        $fileStream.Close()
     }
 }
