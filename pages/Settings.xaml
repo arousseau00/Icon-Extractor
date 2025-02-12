@@ -5,14 +5,53 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <TextBlock Style="{DynamicResource TextBlockTitle}" Text="{DynamicResource Settings}"/>
-        <TextBlock Grid.Row="1" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{DynamicResource lblTest}"/>
-        <ComboBox Name="Language" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200">
-            <ComboBoxItem Content="English" Tag="en"/>
-            <ComboBoxItem Content="Français"  Tag="fr"/>
-        </ComboBox>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0" Style="{DynamicResource TextBlockTitle}" Text="{DynamicResource Settings}"/>
+
+        <!-- Settings -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.4*"/>
+                <ColumnDefinition Width="0.6*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Language -->
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0" 
+                Text="{DynamicResource Language}"
+                Style="{DynamicResource TextBlockSetting}"/>
+            <ComboBox Name="Language" 
+                Grid.Row="0"
+                Grid.Column="1"
+                Style="{DynamicResource ComboBoxSetting}">
+                <ComboBoxItem Content="English" Tag="en"/>
+                <ComboBoxItem Content="Français" Tag="fr"/>
+            </ComboBox>
+
+            <!-- Default size -->
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
+                Text="{DynamicResource DefaultSize}"
+                Style="{DynamicResource TextBlockSetting}"/>
+            <ComboBox Name="DefaultSize"
+                Grid.Row="1"
+                Grid.Column="1"
+                Style="{DynamicResource ComboBoxSetting}">
+                <ComboBoxItem Content="16x16" Tag="16"/>
+                <ComboBoxItem Content="32x32" Tag="32"/>
+                <ComboBoxItem Content="64x64" Tag="64"/>
+                <ComboBoxItem Content="128x128" Tag="128"/>
+                <ComboBoxItem Content="256x256" Tag="256"/>
+                <ComboBoxItem Content="512x512" Tag="512"/>
+            </ComboBox>
+        </Grid>
     </Grid>
 </Page>

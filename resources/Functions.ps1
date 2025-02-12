@@ -374,7 +374,7 @@ function Save-Image {
     )
     
     begin {
-        $fileStream = [System.IO.File]::Create($dialog.FileName)
+        $fileStream = [System.IO.File]::Create($FilePath)
     }
     
     process {
@@ -393,5 +393,63 @@ function Save-Image {
     
     end {
         $fileStream.Close()
+    }
+}
+
+function Set-DefaultSettings {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({ Test-Path -Path $_ -PathType 'Leaf' -IsValid})]
+        [string]$Path,
+
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [hashtable]$DefaultSettings,
+
+        [Parameter(Mandatory = $false)]
+        [switch]$Force
+    )
+    
+    begin {
+        if ($Force) {
+            Write-Verbose -Message 'Force switch is set. Overwriting the settings file.'
+            New-Item -Path $Path -ItemType 'File' -Value '{}' -Force | Out-Null
+        }
+        if (!(Test-Path -Path $Path)) {
+            Write-Verbose -Message 'Settings file does not exist. Creating a new one.'
+            New-Item -Path $Path -ItemType 'File' -Value '{}' | Out-Null
+        }
+        if ([string]::IsNullOrWhiteSpace((Get-Content -Path $Path))) {
+            Write-Verbose -Message 'Settings file is empty. Setting it to an empty object.'
+            Set-Content -Path $Path -Value '{}' | Out-Null
+        }
+        if ((Get-Content -Path $Path) -eq 'null') {
+            Write-Verbose -Message 'Settings file is null. Setting it to an empty object.'
+            Set-Content -Path $Path -Value '{}' | Out-Null
+        }
+
+        $currentSetting = if (Test-Json -Path $Path -ErrorAction 'SilentlyContinue') {
+            Write-Verbose -Message 'Settings file is a valid JSON object. Loading it.'
+            Get-Content -Path $Path | ConvertFrom-Json
+        } else {
+            Write-Verbose -Message 'Settings file is not a valid JSON object. Creating a new one.'
+            [PSCustomObject]::new()
+        }
+    }
+    
+    process {
+        foreach ($setting in $DefaultSettings.GetEnumerator()) {
+            if (!($currentSetting.($setting.Name))) {
+                Write-Verbose -Message "Setting the default value for $($setting.Name)."
+                $currentSetting | Add-Member -MemberType 'NoteProperty' -Name $setting.Name -Value $setting.Value -Force
+            } else {
+                Write-Verbose -Message "The value for $($setting.Name) is already set. Skipping."
+            }
+        }
+    }
+    
+    end {
+        Write-Verbose -Message 'Saving the settings file.'
+        $currentSetting | ConvertTo-Json | Set-Content -Path $Path
     }
 }
