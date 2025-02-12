@@ -8,8 +8,8 @@
         "fr": "Paramètres"
     },
     "Size": {
-        "en": "Size",
-        "fr": "Taille"
+        "en": "Size:",
+        "fr": "Taille :"
     },
     "SaveAs": {
         "en": "Save As...",
@@ -34,5 +34,13 @@
     "Ready": {
         "en": "Ready",
         "fr": "Prêt"
+    },
+    "Language": {
+        "en": "Language:",
+        "fr": "Langue :"
+    },
+    "DefaultSize": {
+        "en": "Default Size:",
+        "fr": "Taille par défaut :"
     }
 }
