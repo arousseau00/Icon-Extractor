@@ -18,15 +18,13 @@
             Grid.Row="0"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            HorizontalAlignment="Center"
             Style="{DynamicResource TextBlockTitle}"
             Text="{DynamicResource Extract}"/>
         
         <StackPanel Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">            
-                <Label Width="40" HorizontalContentAlignment="Right" Content="{DynamicResource Size}"/>
-                <Label Content=":"/>
-                <Label Name="IconSizeValue" Width="60"/>
+                <TextBlock Width="40" HorizontalAlignment="Right" Text="{DynamicResource Size}"/>
+                <TextBlock Name="IconSizeValue" Width="60"/>
             </StackPanel>
             
             <Slider Name="IconSizeSlider"

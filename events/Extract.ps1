@@ -11,7 +11,7 @@ $Extract.Add_Loaded({
 $Extract_IconSizeSlider.Add_ValueChanged({
     # Update the icon label.
     $size = [System.Math]::Pow(2, $Extract_IconSizeSlider.Value)
-    $Extract_IconSizeValue.Content = '{0}x{0}' -f $size
+    $Extract_IconSizeValue.Text = '{0}x{0}' -f $size
 
     # Update the icon preview.
     $Extract_IconPreviewImage.Width = $size
