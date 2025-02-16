@@ -5,6 +5,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Title -->
@@ -41,17 +42,20 @@
                 Grid.Column="0"
                 Text="{DynamicResource DefaultSize}"
                 Style="{DynamicResource TextBlockSetting}"/>
-            <ComboBox Name="DefaultSize"
+            <ComboBox Name="IconSize"
                 Grid.Row="1"
                 Grid.Column="1"
                 Style="{DynamicResource ComboBoxSetting}">
-                <ComboBoxItem Content="16x16" Tag="16"/>
-                <ComboBoxItem Content="32x32" Tag="32"/>
-                <ComboBoxItem Content="64x64" Tag="64"/>
-                <ComboBoxItem Content="128x128" Tag="128"/>
-                <ComboBoxItem Content="256x256" Tag="256"/>
-                <ComboBoxItem Content="512x512" Tag="512"/>
+                <ComboBoxItem Content="16x16" Tag="4"/>
+                <ComboBoxItem Content="32x32" Tag="5"/>
+                <ComboBoxItem Content="64x64" Tag="6"/>
+                <ComboBoxItem Content="128x128" Tag="7"/>
+                <ComboBoxItem Content="256x256" Tag="8"/>
+                <ComboBoxItem Content="512x512" Tag="9"/>
             </ComboBox>
         </Grid>
+
+        <!-- Reset -->
+        <Button Name="ResetButton" Grid.Row="2" Style="{DynamicResource ButtonStyle}" Content="{DynamicResource Reset}"/>
     </Grid>
 </Page>
