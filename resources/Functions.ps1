@@ -176,188 +176,45 @@ function New-WPFLocalizedString {
     }
 }
 
-function Set-AppSetting {
+function Update-AppUILocale {
     [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$Name,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Value
-    )
+    param ()
     
-    begin {
-        $paramPath = @{ Path = "$env:APPDATA\IconExtractor\settings.json" }
-        if (!(Test-Path @paramPath)) { New-Item @paramPath -ItemType 'File' -Value '{}' -Force | Out-Null }
-    }
+    begin {}
     
     process {
-        $settings = Get-Content @paramPath | ConvertFrom-Json
-
-        if ($settings | Get-Member -Name $Name) {
-            $settings.$Name = $Value
-        } else {
-            $settings | Add-Member -MemberType 'NoteProperty' -Name $Name -Value $Value
-        }
-        
-        $settings | ConvertTo-Json | Set-Content @paramPath
-    }
-    
-    end {
-        
-    }
-}
-
-function Get-AppSetting {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$Name
-    )
-    
-    begin {
-        
-    }
-    
-    process {
-        $settings = Get-Content -Path "$env:APPDATA\IconExtractor\settings.json" | ConvertFrom-Json
-        return $settings.$Name
-    }
-    
-    end {
-        
-    }
-}
-
-function Set-AppUILocale {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $false)]
-        [string]$Locale
-    )
-    
-    begin {
-        # Save the provided locale when provided, otherwise get it from the settings.
-        if ($Locale) {
-            Set-AppSetting -Name 'Locale' -Value $Locale
-        } else {
-            $Locale = Get-AppSetting -Name 'Locale' -ErrorAction 'SilentlyContinue'
-        }
-    }
-    
-    process {
-        
-        if (!$Locale) { $Locale = 'en' }
         # Create the localized strings resource dictionary.
-        $localizedStrings = New-WPFLocalizedString -Path '.\resources\Strings.json' -Locale $Locale
+        $localizedStrings = New-WPFLocalizedString -Path '.\resources\Strings.json' -Locale $CurrentSettings.Locale
 
         # Load the localized strings in the application.
         Add-WPFResource -Target $Application -ResourceDictionary $localizedStrings
     }
     
-    end {
-        
-    }
-}
-
-function Export-Icon {
-    <#
-        .SYNOPSIS
-        Extracts the icon from a given executable and saves it as a PNG file.
-
-        .DESCRIPTION
-        Extracts the icon from a given executable and saves it as a PNG file using the executable name as the base name.
-
-        .PARAMETER FilePath
-        Path to the executable to extract the icon from.
-
-        .PARAMETER DestinationPath
-        Path to save the icon as a PNG file.
-        If not provided, the destination path will be the same as the executable path.
-
-        .PARAMETER Size
-        The size of the icon to extract.
-        Defaults to 256.
-
-        .PARAMETER Force
-        If set, the icon will be extracted even if the destination file already exists.
-
-        .EXAMPLE
-        (Get-ChildItem -Path $env:ProgramFiles\software).FullName | Export-Icon -DestinationPath 'C:\Icons' -Size 128 -Force
-
-    #>
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateScript({ Test-Path -Path $_ -PathType 'Leaf' })]
-        [string]$FilePath,
-
-        [Parameter(Mandatory = $false)]
-        [ValidateScript({ Test-Path -Path $_ -PathType 'Container' -IsValid })]
-        [string]$DestinationPath,
-
-        [Parameter(Mandatory = $false)]
-        [ValidateRange(16, 512)]
-        [int]$Size = 256,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$Force
-    )
-    
-    begin {
-        # Set the image format to PNG
-        $imageFormat = [System.Drawing.Imaging.ImageFormat]::Png
-    }
-
-    process {
-        # Set the destination path if not provided
-        if (!$DestinationPath) { $DestinationPath = Split-Path -Path $FilePath -Parent }
-        # Ensure the destination directory exists
-        if (!(Test-Path -Path $DestinationPath)) { New-Item -Path $DestinationPath -ItemType Directory -Force | Out-Null }
-
-        # Construct the full path for the output PNG file
-        $iconName = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
-        $iconFullName = "$DestinationPath\$iconName.png"
-
-        # Extract and save the icon if the Force switch is set or the file does not exist
-        if ($Force -or !(Test-Path -Path $iconFullName)) {
-            [System.Drawing.Icon]::ExtractIcon($FilePath, 0, $Size).ToBitmap().Save($iconFullName, $imageFormat)
-        }
-    }
-
     end {}
 }
 
-function Set-IconPreview {
+function New-IconSet {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [System.Windows.Controls.Image]$Control,
-
         [Parameter(Mandatory = $true)]
         [ValidateScript({ Test-Path -Path $_ -PathType 'Leaf' })]
-        [string]$FilePath,
-
-        [Parameter(Mandatory = $false)]
-        [ValidateRange(16, 512)]
-        [int]$Size = 256
+        [string]$FilePath
     )
     
-    begin {
-        
-    }
+    begin {}
 
     process {
-        # Extract the icon and set it as the source for the Image control
-        $icon = [System.Drawing.Icon]::ExtractIcon($FilePath, 0, $Size).ToBitmap()
-        $iconStream = [System.IO.MemoryStream]::new()
-        $icon.Save($iconStream, [System.Drawing.Imaging.ImageFormat]::Png)
-        $iconStream.Position = 0
-        $iconBitmap = [System.Windows.Media.Imaging.BitmapImage]::new()
-        $iconBitmap.BeginInit()
-        $iconBitmap.StreamSource = $iconStream
-        $iconBitmap.EndInit()
-        $Control.Source = $iconBitmap
+        @(16, 32, 64, 128, 256, 512) | ForEach-Object {
+            $icon = [System.Drawing.Icon]::ExtractIcon($FilePath, 0, $_)
+            $bitmap = $icon.ToBitmap()
+            try {
+                $bitmap.Save("$TempDirectory\$_.png")
+            } catch {
+                return
+            } finally {
+                $bitmap.Dispose()
+            }
+        }
     }
 
     end {}
@@ -367,36 +224,22 @@ function Save-Image {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [System.Windows.Media.Imaging.BitmapSource]$ImageSource,
+        [System.Windows.Media.ImageSource]$ImageSource,
 
         [Parameter(Mandatory = $true)]
         [string]$FilePath
     )
     
-    begin {
-        $fileStream = [System.IO.File]::Create($FilePath)
-    }
+    begin {}
     
     process {
-        $fileType = [System.IO.Path]::GetExtension($FilePath).TrimStart('.').ToLower()
-
-        $bitmapEncoder = switch ($fileType) {
-            'png' { [System.Windows.Media.Imaging.PngBitmapEncoder]::new() }
-            'jpg' { [System.Windows.Media.Imaging.JpegBitmapEncoder]::new() }
-            'gif' { [System.Windows.Media.Imaging.GifBitmapEncoder]::new() }
-            'bmp' { [System.Windows.Media.Imaging.BmpBitmapEncoder]::new() }
-            default { throw 'Unsupported file type.' }
-        }
-        $bitmapEncoder.Frames.Add([System.Windows.Media.Imaging.BitmapFrame]::Create($ImageSource))
-        $bitmapEncoder.Save($fileStream)
+        $ImageSource.ToString() -as [uri] | Select-Object -ExpandProperty 'LocalPath' | Copy-Item -Destination $FilePath -Force
     }
     
-    end {
-        $fileStream.Close()
-    }
+    end {}
 }
 
-function Set-DefaultSettings {
+function Set-DefaultSetting {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
@@ -404,7 +247,7 @@ function Set-DefaultSettings {
         [string]$Path,
 
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [hashtable]$DefaultSettings,
+        [hashtable]$SettingTable,
 
         [Parameter(Mandatory = $false)]
         [switch]$Force
@@ -428,7 +271,7 @@ function Set-DefaultSettings {
             Set-Content -Path $Path -Value '{}' | Out-Null
         }
 
-        $currentSetting = if (Test-Json -Path $Path -ErrorAction 'SilentlyContinue') {
+        $settingsFromFile = if (Test-Json -Path $Path -ErrorAction 'SilentlyContinue') {
             Write-Verbose -Message 'Settings file is a valid JSON object. Loading it.'
             Get-Content -Path $Path | ConvertFrom-Json
         } else {
@@ -438,10 +281,10 @@ function Set-DefaultSettings {
     }
     
     process {
-        foreach ($setting in $DefaultSettings.GetEnumerator()) {
-            if (!($currentSetting.($setting.Name))) {
+        foreach ($setting in $SettingTable.GetEnumerator()) {
+            if (!($settingsFromFile.($setting.Name))) {
                 Write-Verbose -Message "Setting the default value for $($setting.Name)."
-                $currentSetting | Add-Member -MemberType 'NoteProperty' -Name $setting.Name -Value $setting.Value -Force
+                $settingsFromFile | Add-Member -MemberType 'NoteProperty' -Name $setting.Name -Value $setting.Value -Force
             } else {
                 Write-Verbose -Message "The value for $($setting.Name) is already set. Skipping."
             }
@@ -450,6 +293,118 @@ function Set-DefaultSettings {
     
     end {
         Write-Verbose -Message 'Saving the settings file.'
-        $currentSetting | ConvertTo-Json | Set-Content -Path $Path
+        $settingsFromFile | ConvertTo-Json | Set-Content -Path $Path
+    }
+}
+
+function Import-Setting {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({ Test-Path -Path $_ -PathType 'Leaf' })]
+        [string]$Path,
+
+        [Parameter(Mandatory = $true)]
+        [string]$VariableName
+    )
+
+    begin {}
+
+    process {
+        try {
+            Test-Json -Path $Path | Out-Null
+            Write-Verbose -Message 'Settings file is a valid JSON object. Loading it.'
+            $settingsFromFile = Get-Content -Path $Path | ConvertFrom-Json
+            Set-Variable -Name $VariableName -Value $settingsFromFile -Scope 'Global'
+        } catch {
+            Write-Error -Message 'The settings file is not a valid JSON object.'
+        }
+    }
+
+    end {}
+}
+
+function Export-Setting {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({ Test-Path -Path $_ -PathType 'Leaf' })]
+        [string]$Path,
+
+        [Parameter(Mandatory = $true)]
+        [string]$VariableName
+    )
+    
+    begin {
+        
+    }
+    
+    process {
+        try {
+            Get-Variable -Name $VariableName -ValueOnly | ConvertTo-Json | Set-Content -Path $Path
+            Write-Verbose -Message 'Settings exported successfully.'
+        } catch {
+            Write-Error -Message 'Failed to export settings.'
+        }
+    }
+    
+    end {
+        
+    }
+}
+
+function Initialize-TempDirectory {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$VariableName
+    )
+    
+    begin {}
+    
+    process {
+        $newTempName = [System.IO.Path]::GetRandomFileName()
+        $newFolder = New-Item -Path $env:TEMP -ItemType 'Directory' -Name $newTempName -Force
+        $newFolder.GetFiles() | Remove-Item -Force
+
+        Set-Variable -Name $VariableName -Value $newFolder.FullName -Scope 'Global'
+    }
+    
+    end {}
+}
+
+function Update-ImageControl {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.Windows.Controls.Image]$ImageControl,
+
+        [Parameter(Mandatory = $true)]
+        [string]$ImagePath
+    )
+    
+    begin {
+        
+    }
+    
+    process {
+        if ($ImagePath) {
+            $stream = [System.IO.File]::OpenRead($ImagePath)
+            try {
+                $bitmapImage = [System.Windows.Media.Imaging.BitmapImage]::new()
+                $bitmapImage.BeginInit()
+                $bitmapImage.StreamSource = $stream
+                $bitmapImage.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
+                $bitmapImage.EndInit()
+                $ImageControl.Source = $bitmapImage
+            } finally {
+                $stream.Close()
+                $stream.Dispose()
+            }
+        }
+    }
+    
+    end {
+        
     }
 }

@@ -42,5 +42,13 @@
     "DefaultSize": {
         "en": "Default Size:",
         "fr": "Taille par défaut :"
+    },
+    "Reset": {
+        "en": "Reset",
+        "fr": "Réinitialiser"
+    },
+    "IconSaved": {
+        "en": "Icon saved successfully.",
+        "fr": "Icône enregistrée avec succès."
     }
 }

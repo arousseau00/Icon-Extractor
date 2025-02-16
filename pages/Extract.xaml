@@ -24,7 +24,7 @@
         <StackPanel Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">            
                 <TextBlock Width="40" HorizontalAlignment="Right" Text="{DynamicResource Size}"/>
-                <TextBlock Name="IconSizeValue" Width="60"/>
+                <TextBlock Name="IconSizeText" Width="60"/>
             </StackPanel>
             
             <Slider Name="IconSizeSlider"
@@ -37,12 +37,13 @@
                 Minimum="4"
                 Maximum="9"
                 IsSnapToTickEnabled="True"
-                TickFrequency="1"/>
+                TickFrequency="1"
+                IsEnabled="False"/>
         </StackPanel>
 
         <Grid Grid.Row="1" Grid.Column="1" Width="514" Height="514" Margin="10">
             <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Image Name="IconPreviewImage" Stretch="Fill"/>
+                <Image Name="IconPreviewImage" Height="{Binding Width, ElementName=IconPreviewImage}" Stretch="Fill"/>
             </Border>
         </Grid>
         
@@ -50,5 +51,7 @@
             <Button Name="BrowseButton" Style="{DynamicResource ButtonStyle}" Content="{DynamicResource Browse}"/>
             <Button Name="SaveAsButton" Style="{DynamicResource ButtonStyle}" Content="{DynamicResource SaveAs}" IsEnabled="False"/>
         </StackPanel>
+
+        <TextBox Name="IconPathTextBox" Opacity="0"/>
     </Grid>
 </Page>

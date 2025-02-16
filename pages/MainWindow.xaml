@@ -62,7 +62,7 @@
         <!-- Status Bar -->
         <StatusBar Grid.Row="1" Grid.ColumnSpan="3">
             <StatusBarItem>
-                <TextBlock Text="{DynamicResource Ready}"/>
+                <TextBlock Name="StatusText"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>
